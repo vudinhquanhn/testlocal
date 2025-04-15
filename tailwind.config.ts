@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				purple: {
+					DEFAULT: '#9b87f5',
+					50: '#f2f0fb',
+					100: '#e5deff',
+					200: '#d6bcfa',
+					300: '#9b87f5',
+					400: '#8b5cf6',
+					500: '#7e69ab',
+					600: '#6e59a5',
+					700: '#1A1F2C',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,12 +96,36 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0'
+					},
+					'100%': {
+						opacity: '1'
+					}
+				},
+				'slide-up': {
+					'0%': {
+						transform: 'translateY(20px)',
+						opacity: '0'
+					},
+					'100%': {
+						transform: 'translateY(0)',
+						opacity: '1'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out',
+				'slide-up': 'slide-up 0.5s ease-out'
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+				'gradient-purple': 'linear-gradient(135deg, #9b87f5 0%, #7e69ab 100%)',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
