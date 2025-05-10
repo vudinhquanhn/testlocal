@@ -22,7 +22,84 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onClose, o
     try {
       console.log("Đang phân tích kết quả:", JSON.stringify(result, null, 2));
       
-      // Trích xuất dựa trên cấu trúc thực tế từ ảnh chụp màn hình
+      // Kiểm tra nếu có message object
+      if (result && result.message) {
+        // Kiểm tra cấu trúc có field result là array
+        if (result.message.result && Array.isArray(result.message.result) && result.message.result.length > 0) {
+          const firstResult = result.message.result[0];
+          
+          // Kiểm tra nếu có field result.output
+          if (firstResult.result && firstResult.result.output) {
+            const output = firstResult.result.output;
+            
+            // Trường hợp output là chuỗi có chứa JSON với \n và \"content\":
+            if (typeof output === 'string') {
+              // Từ hình ảnh, chúng ta thấy output có dạng: "Tóm tắt nội dung_1: "{\n \"content\": {\n..."
+              const contentMatch = output.match(/\"content\"\s*:\s*\{([\s\S]*?)\}/);
+              if (contentMatch && contentMatch[0]) {
+                // Trích xuất nội dung content
+                try {
+                  // Parse phần JSON có dạng "content": {...}
+                  const contentJson = `{${contentMatch[0]}}`;
+                  const parsed = JSON.parse(contentJson.replace(/\\n/g, '').replace(/\\"/g, '"'));
+                  if (parsed.content) {
+                    return parsed.content;
+                  }
+                } catch (e) {
+                  console.error("Lỗi khi parse JSON từ chuỗi:", e);
+                }
+              }
+              
+              // Nếu không tìm thấy theo cấu trúc trên, thử tìm text giữa dấu ngoặc kép sau \"content\":
+              const simpleMatch = output.match(/\"content\"\s*:\s*\"([\s\S]*?)\"/);
+              if (simpleMatch && simpleMatch[1]) {
+                return simpleMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+              }
+              
+              // Trả về output nếu không thể trích xuất
+              return output;
+            }
+            
+            // Nếu output là object
+            if (typeof output === 'object' && output !== null) {
+              if (output.content) {
+                return output.content;
+              }
+            }
+          }
+        }
+        
+        // Tìm kiếm bất kỳ trường content nào trong message
+        const findContentRecursively = (obj: any): string | null => {
+          if (!obj || typeof obj !== 'object') return null;
+          
+          // Kiểm tra trường hợp đặc biệt cho chuỗi output như trong hình ảnh
+          if (obj.output && typeof obj.output === 'string' && obj.output.includes('"content"')) {
+            const match = obj.output.match(/\"content\"\s*:\s*\"([\s\S]*?)\"/);
+            if (match && match[1]) {
+              return match[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+            }
+          }
+          
+          // Kiểm tra nếu đối tượng hiện tại có trường content
+          if (obj.content !== undefined) return obj.content;
+          
+          // Tìm kiếm đệ quy trong tất cả các trường của đối tượng
+          for (const key in obj) {
+            if (typeof obj[key] === 'object' && obj[key] !== null) {
+              const found = findContentRecursively(obj[key]);
+              if (found !== null) return found;
+            }
+          }
+          
+          return null;
+        };
+        
+        const foundContent = findContentRecursively(result.message);
+        if (foundContent) return foundContent;
+      }
+      
+      // Trường hợp cuối cùng: hiển thị toàn bộ output để người dùng có thể thấy dữ liệu
       if (result && 
           result.message && 
           result.message.result && 
@@ -31,57 +108,15 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onClose, o
           result.message.result[0].result && 
           result.message.result[0].result.output) {
         
-        // Lấy phần content từ output
-        const output = result.message.result[0].result.output;
-        
-        if (output.content) {
-          return output.content;
-        } else if (typeof output === 'string' && output.includes('"content":')) {
-          // Trường hợp output là string JSON
-          try {
-            const parsedOutput = JSON.parse(output);
-            if (parsedOutput.content) {
-              return parsedOutput.content;
-            }
-          } catch (e) {
-            // Nếu không phải JSON hợp lệ, thử trích xuất bằng regex
-            const contentMatch = output.match(/"content"\s*:\s*"([^"]*)"/);
-            if (contentMatch && contentMatch[1]) {
-              return contentMatch[1];
-            }
-          }
-        }
-      }
-      
-      // Kiểm tra cấu trúc thay thế
-      if (result && 
-          result.message && 
-          typeof result.message === 'object') {
-        
-        // Tìm kiếm trường content trong bất kỳ vị trí nào
-        const findContent = (obj: any): string | null => {
-          if (!obj || typeof obj !== 'object') return null;
-          
-          if (obj.content) return obj.content;
-          
-          for (const key in obj) {
-            if (typeof obj[key] === 'object') {
-              const found = findContent(obj[key]);
-              if (found) return found;
-            }
-          }
-          
-          return null;
-        };
-        
-        const foundContent = findContent(result.message);
-        if (foundContent) return foundContent;
+        return typeof result.message.result[0].result.output === 'string' 
+          ? result.message.result[0].result.output
+          : JSON.stringify(result.message.result[0].result.output, null, 2);
       }
       
       return "Không tìm thấy nội dung tóm tắt trong phản hồi";
     } catch (err) {
       console.error("Lỗi khi trích xuất content:", err);
-      return "Lỗi khi trích xuất nội dung";
+      return JSON.stringify(result, null, 2); // Trả về toàn bộ kết quả để debug
     }
   };
   

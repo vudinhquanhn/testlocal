@@ -52,6 +52,20 @@ export const useDocumentUpload = () => {
         });
         checkExecutionStatus(data.execution_id);
       } else if (data.error || data.message) {
+        // Kiểm tra nếu đây không phải là một lỗi thực sự mà là phản hồi thành công
+        if (data.message && 
+            data.message.result && 
+            Array.isArray(data.message.result) && 
+            data.message.result.length > 0) {
+          // Nếu có kết quả, coi như thành công
+          setResult(data);
+          toast({
+            title: "Hoàn thành",
+            description: "Đã xử lý tài liệu thành công.",
+          });
+          setIsUploading(false);
+          return;
+        }
         throw new Error(data.error || data.message || "Không nhận được execution_id từ API");
       } else {
         throw new Error("Không nhận được execution_id từ API");
@@ -89,7 +103,10 @@ export const useDocumentUpload = () => {
         const data = await checkDocumentStatus(id);
         console.log("Kết quả kiểm tra trạng thái:", data);
 
-        if (data.status === "completed" || data.status === "success") {
+        // Kiểm tra các cấu trúc khác nhau của phản hồi thành công
+        if (data.status === "completed" || 
+            data.status === "success" ||
+            (data.message && data.message.execution_status === "COMPLETED")) {
           setResult(data);
           toast({
             title: "Hoàn thành",
