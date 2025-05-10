@@ -54,6 +54,7 @@ export const useDocumentUpload = () => {
       } else if (data.error || data.message) {
         // Kiểm tra nếu đây không phải là một lỗi thực sự mà là phản hồi thành công
         if (data.message && 
+            typeof data.message === 'object' && 
             data.message.result && 
             Array.isArray(data.message.result) && 
             data.message.result.length > 0) {
@@ -66,7 +67,7 @@ export const useDocumentUpload = () => {
           setIsUploading(false);
           return;
         }
-        throw new Error(data.error || data.message || "Không nhận được execution_id từ API");
+        throw new Error(data.error || (typeof data.message === 'string' ? data.message : 'Lỗi không xác định') || "Không nhận được execution_id từ API");
       } else {
         throw new Error("Không nhận được execution_id từ API");
       }
@@ -106,7 +107,9 @@ export const useDocumentUpload = () => {
         // Kiểm tra các cấu trúc khác nhau của phản hồi thành công
         if (data.status === "completed" || 
             data.status === "success" ||
-            (data.message && data.message.execution_status === "COMPLETED")) {
+            (data.message && 
+             typeof data.message === 'object' &&
+             data.message.execution_status === "COMPLETED")) {
           setResult(data);
           toast({
             title: "Hoàn thành",
@@ -118,7 +121,7 @@ export const useDocumentUpload = () => {
         } else if (data.status === "failed" || data.status === "error") {
           toast({
             title: "Xử lý thất bại",
-            description: data.message || "Không thể xử lý tài liệu.",
+            description: typeof data.message === 'string' ? data.message : "Không thể xử lý tài liệu.",
             variant: "destructive",
           });
           setIsPolling(false);
