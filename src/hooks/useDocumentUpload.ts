@@ -51,14 +51,15 @@ export const useDocumentUpload = () => {
           description: "Đang xử lý tài liệu...",
         });
         checkExecutionStatus(data.execution_id);
-      } else if (data.error || data.message) {
+      } else if (data.error || data.message !== undefined) {
         // Kiểm tra nếu đây không phải là một lỗi thực sự mà là phản hồi thành công
-        if (data.message !== null && 
-            data.message !== undefined &&
-            typeof data.message === 'object' && 
-            data.message.result && 
-            Array.isArray(data.message.result) && 
-            data.message.result.length > 0) {
+        const dataMessage = data.message;
+        if (dataMessage !== null && 
+            dataMessage !== undefined &&
+            typeof dataMessage === 'object' && 
+            dataMessage.result && 
+            Array.isArray(dataMessage.result) && 
+            dataMessage.result.length > 0) {
           // Nếu có kết quả, coi như thành công
           setResult(data);
           toast({
@@ -123,7 +124,7 @@ export const useDocumentUpload = () => {
         } else if (data.status === "failed" || data.status === "error") {
           toast({
             title: "Xử lý thất bại",
-            description: data.message !== null && typeof data.message === 'string' ? data.message : "Không thể xử lý tài liệu.",
+            description: data.message !== null && data.message !== undefined && typeof data.message === 'string' ? data.message : "Không thể xử lý tài liệu.",
             variant: "destructive",
           });
           setIsPolling(false);
