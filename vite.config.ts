@@ -9,25 +9,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    proxy: {
-      '/api/mock_org/tomtat': {
-        target: 'http://127.0.0.1:90/deployment/api/mock_org/tomtat/',
-        changeOrigin: true,
-        rewrite: (path) => '',
-        secure: false,
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            console.log('proxy error', err);
-          });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('Sending Request:', req.method, req.url);
-          });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('Received Response from:', req.url, proxyRes.statusCode);
-          });
-        },
-      }
-    }
+    // Loại bỏ cấu hình proxy vì chúng ta gọi API trực tiếp
   },
   plugins: [
     react(),

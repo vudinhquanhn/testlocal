@@ -1,6 +1,6 @@
 
-// Updated API URL to use local proxy to bypass CORS
-const API_BASE_URL = "/api/mock_org/tomtat";
+// Cập nhật API URL để gọi trực tiếp (không qua proxy)
+const API_BASE_URL = "http://frontend.unstract.localhost:90/deployment/api/mock_org/tomtat/";
 const AUTH_TOKEN = "48ea2c2d-0433-4767-9df8-ddba844e125e";
 
 interface UploadResponse {
@@ -41,9 +41,14 @@ export const uploadDocument = async (file: File): Promise<UploadResponse> => {
       headers: {
         "Authorization": `Bearer ${AUTH_TOKEN}`,
         "Accept": "application/json"
+        // Loại bỏ các headers không cần thiết, để trình duyệt tự động thêm headers cần thiết cho form-data
       },
       body: formData,
-      signal: controller.signal
+      signal: controller.signal,
+      // Thêm mode: 'cors' để cho phép CORS requests
+      mode: 'cors',
+      // Không gửi cookies
+      credentials: 'omit'
     });
     
     clearTimeout(timeoutId);
@@ -114,7 +119,9 @@ export const checkDocumentStatus = async (executionId: string): Promise<UploadRe
         "Authorization": `Bearer ${AUTH_TOKEN}`,
         "Accept": "application/json"
       },
-      signal: controller.signal
+      signal: controller.signal,
+      mode: 'cors',
+      credentials: 'omit'
     });
     
     clearTimeout(timeoutId);
