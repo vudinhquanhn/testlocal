@@ -60,8 +60,11 @@ export const useDocumentUpload = () => {
             dataMessage !== undefined &&
             typeof dataMessage === 'object') {
           
-          // Additional null check before accessing 'result' property
-          if ('result' in dataMessage && dataMessage !== null && dataMessage !== undefined && dataMessage.result !== null) {
+          // Additional null check before accessing 'result' property - Fix for line 64,27 and 64,95
+          if (dataMessage !== null && 
+              'result' in dataMessage && 
+              dataMessage.result !== null) {
+              
             // Explicitly cast dataMessage to avoid TypeScript errors with 'result'
             const typedDataMessage = dataMessage as {result: any[]};
             
@@ -125,12 +128,12 @@ export const useDocumentUpload = () => {
              data.message !== undefined &&
              typeof data.message === 'object')) {
           
-          // Additional checks for data.message being an object and having execution_status
+          // Additional checks for data.message being an object and having execution_status - Fix for line 132,37
           if (data.message !== null && 
               data.message !== undefined &&
               typeof data.message === 'object' && 
-              'execution_status' in data.message && 
-              data.message !== null) {
+              data.message !== null &&  // Extra null check to satisfy TS
+              'execution_status' in data.message) {
             
             // Create a typed variable to satisfy TypeScript
             const messageData = data.message as {execution_status: string | null | undefined};
