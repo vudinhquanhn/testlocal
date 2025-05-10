@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { uploadDocument, checkDocumentStatus } from "@/services/documentService";
@@ -54,14 +55,15 @@ export const useDocumentUpload = () => {
         // Kiểm tra nếu đây không phải là một lỗi thực sự mà là phản hồi thành công
         const dataMessage = data.message;
         
-        // Perform strict null and type check before accessing properties
+        // Fix for line 64: Add comprehensive null check for dataMessage before accessing properties
         if (dataMessage !== null && 
             dataMessage !== undefined &&
             typeof dataMessage === 'object') {
           
           // Kiểm tra chặt chẽ trước khi truy cập các thuộc tính
           // Chỉ tiếp tục nếu dataMessage tồn tại, là một đối tượng, và có thuộc tính 'result'
-          if ('result' in dataMessage) {
+          if (dataMessage !== null && 
+              'result' in dataMessage) {
             // Tạo biến kiểu rõ ràng để tránh lỗi TypeScript
             const typedDataMessage = dataMessage as {result: any[]};
             
