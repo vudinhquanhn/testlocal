@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,6 +13,9 @@ const DocumentUploader = () => {
   const [executionId, setExecutionId] = useState<string | null>(null);
   const [isPolling, setIsPolling] = useState(false);
   const { toast } = useToast();
+
+  // URL API được cập nhật với cổng 90
+  const API_BASE_URL = "http://frontend.unstract.localhost:90/deployment/api/mock_org/tomtat/";
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -50,7 +52,7 @@ const DocumentUploader = () => {
       formData.append("include_metadata", "False");
       formData.append("include_metrics", "False");
 
-      const response = await fetch("http://frontend.unstract.localhost/deployment/api/mock_org/tomtat/", {
+      const response = await fetch(API_BASE_URL, {
         method: "POST",
         headers: {
           "Authorization": "Bearer 48ea2c2d-0433-4767-9df8-ddba844e125e",
@@ -105,7 +107,7 @@ const DocumentUploader = () => {
       }
 
       try {
-        const statusUrl = `http://frontend.unstract.localhost/deployment/api/mock_org/tomtat/?execution_id=${id}&include_metadata=False&include_metrics=False`;
+        const statusUrl = `${API_BASE_URL}?execution_id=${id}&include_metadata=False&include_metrics=False`;
         const response = await fetch(statusUrl, {
           method: "GET",
           headers: {
