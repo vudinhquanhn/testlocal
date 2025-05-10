@@ -1,6 +1,6 @@
 
-// Updated API URL to match Postman configuration
-const API_BASE_URL = "http://frontend.unstract.localhost:90/deployment/api/mock_org/tomtat/";
+// Updated API URL to use local proxy to bypass CORS
+const API_BASE_URL = "/api/mock_org/tomtat";
 const AUTH_TOKEN = "48ea2c2d-0433-4767-9df8-ddba844e125e";
 
 interface UploadResponse {
@@ -32,20 +32,26 @@ export const uploadDocument = async (file: File): Promise<UploadResponse> => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
     
+    // Add detailed request debug info
+    const requestStartTime = new Date();
+    console.log(`Starting request at: ${requestStartTime.toISOString()}`);
+    
     const response = await fetch(API_BASE_URL, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${AUTH_TOKEN}`,
+        "Accept": "application/json"
       },
       body: formData,
-      signal: controller.signal,
-      // Add mode: 'cors' explicitly
-      mode: 'cors',
-      // Don't send or receive cookies
-      credentials: 'omit'
+      signal: controller.signal
     });
     
     clearTimeout(timeoutId);
+    
+    // Log response details for debugging
+    console.log("Response status:", response.status);
+    console.log("Response status text:", response.statusText);
+    console.log("Response time:", new Date().getTime() - requestStartTime.getTime(), "ms");
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -66,6 +72,11 @@ export const uploadDocument = async (file: File): Promise<UploadResponse> => {
     
     // More descriptive error messages based on error type
     if (error instanceof TypeError && error.message.includes("Failed to fetch")) {
+      console.error("Network Error Details:", {
+        errorName: error.name,
+        errorMessage: error.message,
+        stack: error.stack
+      });
       throw new Error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng hoặc cấu hình API.");
     } else if (error instanceof DOMException && error.name === "AbortError") {
       throw new Error("Yêu cầu đã hết thời gian chờ. Vui lòng thử lại sau.");
@@ -74,6 +85,11 @@ export const uploadDocument = async (file: File): Promise<UploadResponse> => {
       if (error.message.includes("CORS")) {
         throw new Error("Lỗi CORS: API không chấp nhận yêu cầu từ nguồn này. Vui lòng kiểm tra cấu hình CORS trên máy chủ.");
       }
+      console.error("Unexpected error details:", {
+        errorName: error.name,
+        errorMessage: error.message,
+        stack: error.stack
+      });
       throw error;
     }
     
@@ -89,19 +105,23 @@ export const checkDocumentStatus = async (executionId: string): Promise<UploadRe
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
     
+    const requestStartTime = new Date();
+    console.log(`Starting status check at: ${requestStartTime.toISOString()}`);
+    
     const response = await fetch(statusUrl, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${AUTH_TOKEN}`,
+        "Accept": "application/json"
       },
-      signal: controller.signal,
-      // Add mode: 'cors' explicitly
-      mode: 'cors',
-      // Don't send or receive cookies
-      credentials: 'omit'
+      signal: controller.signal
     });
     
     clearTimeout(timeoutId);
+    
+    // Log response details for debugging
+    console.log("Status check response status:", response.status);
+    console.log("Status check response time:", new Date().getTime() - requestStartTime.getTime(), "ms");
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -122,6 +142,11 @@ export const checkDocumentStatus = async (executionId: string): Promise<UploadRe
     
     // More descriptive error messages based on error type
     if (error instanceof TypeError && error.message.includes("Failed to fetch")) {
+      console.error("Status check network error details:", {
+        errorName: error?.name,
+        errorMessage: error?.message,
+        stack: error?.stack
+      });
       throw new Error("Không thể kết nối đến máy chủ khi kiểm tra trạng thái. Vui lòng kiểm tra kết nối mạng.");
     } else if (error instanceof DOMException && error.name === "AbortError") {
       throw new Error("Kiểm tra trạng thái đã hết thời gian chờ. Vui lòng thử lại sau.");
