@@ -17,19 +17,68 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onClose, o
   // Kiểm tra xem có phải là thông báo lỗi không
   const isErrorResult = hasValidResult && (result.error || result.status === "failed" || result.status === "error");
   
-  // Trích xuất content từ cấu trúc JSON lồng nhau
+  // Trích xuất content từ cấu trúc JSON lồng nhau dựa trên cấu trúc thực tế
   const extractContentFromResult = (result: any): string => {
     try {
+      console.log("Đang phân tích kết quả:", JSON.stringify(result, null, 2));
+      
+      // Trích xuất dựa trên cấu trúc thực tế từ ảnh chụp màn hình
       if (result && 
-          result.result && 
-          Array.isArray(result.result) && 
-          result.result[0] && 
-          result.result[0].result && 
-          result.result[0].result.output && 
-          result.result[0].result.output.content) {
-        return result.result[0].result.output.content;
+          result.message && 
+          result.message.result && 
+          Array.isArray(result.message.result) && 
+          result.message.result[0] && 
+          result.message.result[0].result && 
+          result.message.result[0].result.output) {
+        
+        // Lấy phần content từ output
+        const output = result.message.result[0].result.output;
+        
+        if (output.content) {
+          return output.content;
+        } else if (typeof output === 'string' && output.includes('"content":')) {
+          // Trường hợp output là string JSON
+          try {
+            const parsedOutput = JSON.parse(output);
+            if (parsedOutput.content) {
+              return parsedOutput.content;
+            }
+          } catch (e) {
+            // Nếu không phải JSON hợp lệ, thử trích xuất bằng regex
+            const contentMatch = output.match(/"content"\s*:\s*"([^"]*)"/);
+            if (contentMatch && contentMatch[1]) {
+              return contentMatch[1];
+            }
+          }
+        }
       }
-      return "Không tìm thấy nội dung tóm tắt";
+      
+      // Kiểm tra cấu trúc thay thế
+      if (result && 
+          result.message && 
+          typeof result.message === 'object') {
+        
+        // Tìm kiếm trường content trong bất kỳ vị trí nào
+        const findContent = (obj: any): string | null => {
+          if (!obj || typeof obj !== 'object') return null;
+          
+          if (obj.content) return obj.content;
+          
+          for (const key in obj) {
+            if (typeof obj[key] === 'object') {
+              const found = findContent(obj[key]);
+              if (found) return found;
+            }
+          }
+          
+          return null;
+        };
+        
+        const foundContent = findContent(result.message);
+        if (foundContent) return foundContent;
+      }
+      
+      return "Không tìm thấy nội dung tóm tắt trong phản hồi";
     } catch (err) {
       console.error("Lỗi khi trích xuất content:", err);
       return "Lỗi khi trích xuất nội dung";
