@@ -1,4 +1,3 @@
-
 // Cập nhật API URL để gọi trực tiếp (không qua proxy)
 const API_BASE_URL = "http://frontend.unstract.localhost:90/deployment/api/mock_org/tomtat/";
 const AUTH_TOKEN = "48ea2c2d-0433-4767-9df8-ddba844e125e";
@@ -116,7 +115,6 @@ export const checkDocumentStatus = async (executionId: string): Promise<UploadRe
       method: "GET",
       headers: {
         "Authorization": `Bearer ${AUTH_TOKEN}`,
-        "Accept": "application/json"
       },
       signal: controller.signal,
       mode: 'cors',
