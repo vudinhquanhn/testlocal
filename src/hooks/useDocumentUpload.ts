@@ -60,7 +60,7 @@ export const useDocumentUpload = () => {
             dataMessage !== undefined &&
             typeof dataMessage === 'object') {
           
-          // Fix for lines 63, 64, and 65: Add strict null check before accessing properties
+          // Fix for lines 67, 68, and 69: Add strict null check before accessing properties
           // Only proceed if dataMessage exists, is an object, and has the 'result' property
           if (dataMessage !== null && 
               typeof dataMessage === 'object' &&
