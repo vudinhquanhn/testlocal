@@ -1,5 +1,6 @@
 // Cập nhật API URL để gọi trực tiếp (không qua proxy)
-const API_BASE_URL = "http://frontend.unstract.localhost:90/deployment/api/mock_org/tomtat/";
+//const API_BASE_URL = "http://frontend.unstract.localhost:90/deployment/api/mock_org/tomtat/";
+const API_BASE_URL = "/deployment/api/mock_org/tomtat/";
 const AUTH_TOKEN = "48ea2c2d-0433-4767-9df8-ddba844e125e";
 
 interface UploadResponse {
@@ -42,11 +43,11 @@ export const uploadDocument = async (file: File): Promise<UploadResponse> => {
         // Đã bỏ header "Accept": "application/json" theo yêu cầu
       },
       body: formData,
-      signal: controller.signal,
+      //signal: controller.signal,
       // Thêm mode: 'cors' để cho phép CORS requests
-      mode: 'cors',
+      //mode: 'cors',
       // Không gửi cookies
-      credentials: 'omit'
+      //credentials: 'omit'
     });
     
     clearTimeout(timeoutId);

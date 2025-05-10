@@ -7,9 +7,16 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
-    port: 8080,
-    // Loại bỏ cấu hình proxy vì chúng ta gọi API trực tiếp
+   // host: "::",
+   // port: 8080,
+   // Loại bỏ cấu hình proxy vì chúng ta gọi API trực tiếp
+   proxy: {
+    '/deployment/api': {
+      target: 'http://frontend.unstract.localhost:90',
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/deployment\/api/, '/deployment/api')
+    }
+  } 
   },
   plugins: [
     react(),
