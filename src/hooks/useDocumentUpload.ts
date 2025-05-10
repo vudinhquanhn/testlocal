@@ -54,22 +54,28 @@ export const useDocumentUpload = () => {
       } else if (data.error || data.message !== undefined) {
         // Kiểm tra nếu đây không phải là một lỗi thực sự mà là phản hồi thành công
         const dataMessage = data.message;
-        // Ensure dataMessage is not null and is an object before accessing its properties
+        
+        // Perform strict null and type check before accessing properties
         if (dataMessage !== null && 
             dataMessage !== undefined &&
-            typeof dataMessage === 'object' && 
-            'result' in dataMessage && 
-            Array.isArray(dataMessage.result) && 
-            dataMessage.result.length > 0) {
-          // Nếu có kết quả, coi như thành công
-          setResult(data);
-          toast({
-            title: "Hoàn thành",
-            description: "Đã xử lý tài liệu thành công.",
-          });
-          setIsUploading(false);
-          return;
+            typeof dataMessage === 'object') {
+          
+          // Only access result if it exists in dataMessage
+          if ('result' in dataMessage && 
+              dataMessage.result !== null && 
+              Array.isArray(dataMessage.result) && 
+              dataMessage.result.length > 0) {
+            // Nếu có kết quả, coi như thành công
+            setResult(data);
+            toast({
+              title: "Hoàn thành",
+              description: "Đã xử lý tài liệu thành công.",
+            });
+            setIsUploading(false);
+            return;
+          }
         }
+        
         throw new Error(data.error || (data.message !== null && typeof data.message === 'string' ? data.message : 'Lỗi không xác định') || "Không nhận được execution_id từ API");
       } else {
         throw new Error("Không nhận được execution_id từ API");
@@ -114,6 +120,7 @@ export const useDocumentUpload = () => {
              data.message !== undefined &&
              typeof data.message === 'object' &&
              'execution_status' in data.message && 
+             data.message.execution_status !== null &&
              data.message.execution_status === "COMPLETED")) {
           setResult(data);
           toast({
