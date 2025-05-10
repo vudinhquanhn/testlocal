@@ -40,6 +40,7 @@ export const useDocumentUpload = () => {
     setResult(null);
     
     try {
+      console.log("Bắt đầu tải lên tài liệu:", selectedFile.name);
       const data = await uploadDocument(selectedFile);
       console.log("Kết quả upload:", data);
       
@@ -50,6 +51,8 @@ export const useDocumentUpload = () => {
           description: "Đang xử lý tài liệu...",
         });
         checkExecutionStatus(data.execution_id);
+      } else if (data.error || data.message) {
+        throw new Error(data.error || data.message || "Không nhận được execution_id từ API");
       } else {
         throw new Error("Không nhận được execution_id từ API");
       }
@@ -98,7 +101,7 @@ export const useDocumentUpload = () => {
         } else if (data.status === "failed" || data.status === "error") {
           toast({
             title: "Xử lý thất bại",
-            description: "Không thể xử lý tài liệu.",
+            description: data.message || "Không thể xử lý tài liệu.",
             variant: "destructive",
           });
           setIsPolling(false);
