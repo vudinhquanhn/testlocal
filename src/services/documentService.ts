@@ -1,6 +1,6 @@
 
-// Updated API URL to use localhost directly
-const API_BASE_URL = "http://localhost:90/deployment/api/mock_org/tomtat/";
+// Updated API URL to match Postman configuration
+const API_BASE_URL = "http://frontend.unstract.localhost:90/deployment/api/mock_org/tomtat/";
 const AUTH_TOKEN = "48ea2c2d-0433-4767-9df8-ddba844e125e";
 
 interface UploadResponse {
@@ -19,6 +19,14 @@ export const uploadDocument = async (file: File): Promise<UploadResponse> => {
     formData.append("include_metrics", "False");
 
     console.log("Sending request to:", API_BASE_URL);
+    console.log("Form data:", {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      timeout: "300",
+      include_metadata: "False",
+      include_metrics: "False"
+    });
     
     // Increased timeout for fetch with AbortController
     const controller = new AbortController();
@@ -30,7 +38,11 @@ export const uploadDocument = async (file: File): Promise<UploadResponse> => {
         "Authorization": `Bearer ${AUTH_TOKEN}`,
       },
       body: formData,
-      signal: controller.signal
+      signal: controller.signal,
+      // Add mode: 'cors' explicitly
+      mode: 'cors',
+      // Don't send or receive cookies
+      credentials: 'omit'
     });
     
     clearTimeout(timeoutId);
@@ -57,6 +69,12 @@ export const uploadDocument = async (file: File): Promise<UploadResponse> => {
       throw new Error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng hoặc cấu hình API.");
     } else if (error instanceof DOMException && error.name === "AbortError") {
       throw new Error("Yêu cầu đã hết thời gian chờ. Vui lòng thử lại sau.");
+    } else if (error instanceof Error) {
+      // Detailed error for CORS issues
+      if (error.message.includes("CORS")) {
+        throw new Error("Lỗi CORS: API không chấp nhận yêu cầu từ nguồn này. Vui lòng kiểm tra cấu hình CORS trên máy chủ.");
+      }
+      throw error;
     }
     
     throw error;
@@ -76,7 +94,11 @@ export const checkDocumentStatus = async (executionId: string): Promise<UploadRe
       headers: {
         "Authorization": `Bearer ${AUTH_TOKEN}`,
       },
-      signal: controller.signal
+      signal: controller.signal,
+      // Add mode: 'cors' explicitly
+      mode: 'cors',
+      // Don't send or receive cookies
+      credentials: 'omit'
     });
     
     clearTimeout(timeoutId);
@@ -103,6 +125,8 @@ export const checkDocumentStatus = async (executionId: string): Promise<UploadRe
       throw new Error("Không thể kết nối đến máy chủ khi kiểm tra trạng thái. Vui lòng kiểm tra kết nối mạng.");
     } else if (error instanceof DOMException && error.name === "AbortError") {
       throw new Error("Kiểm tra trạng thái đã hết thời gian chờ. Vui lòng thử lại sau.");
+    } else if (error instanceof Error && error.message.includes("CORS")) {
+      throw new Error("Lỗi CORS: API không chấp nhận yêu cầu kiểm tra trạng thái từ nguồn này.");
     }
     
     throw error;

@@ -13,6 +13,9 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onClose, o
   // Kiểm tra xem có kết quả hợp lệ không
   const hasValidResult = result && typeof result === 'object';
   
+  // Kiểm tra xem có phải là thông báo lỗi không
+  const isErrorResult = hasValidResult && (result.error || result.status === "failed" || result.status === "error");
+  
   return (
     <div className="space-y-4">
       {!hasValidResult ? (
@@ -20,6 +23,13 @@ export const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onClose, o
           <AlertTitle>Lỗi kết quả</AlertTitle>
           <AlertDescription>
             Không thể hiển thị kết quả. Định dạng kết quả không hợp lệ.
+          </AlertDescription>
+        </Alert>
+      ) : isErrorResult ? (
+        <Alert variant="destructive">
+          <AlertTitle>Xử lý không thành công</AlertTitle>
+          <AlertDescription>
+            {result.message || result.error || "Đã xảy ra lỗi khi xử lý tài liệu."}
           </AlertDescription>
         </Alert>
       ) : (
