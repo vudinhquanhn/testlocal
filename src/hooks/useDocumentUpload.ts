@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { uploadDocument, checkDocumentStatus } from "@/services/documentService";
@@ -60,7 +59,7 @@ export const useDocumentUpload = () => {
             dataMessage !== undefined &&
             typeof dataMessage === 'object') {
           
-          // Fix for lines 64, 65, and 66: Add strict null check before accessing properties
+          // Fix for lines 67, 68, and 69: Add strict null check before accessing properties
           // Only proceed if dataMessage exists, is an object, and has the 'result' property
           if (dataMessage !== null && 
               typeof dataMessage === 'object' && 
@@ -72,7 +71,9 @@ export const useDocumentUpload = () => {
             const typedDataMessage = dataMessage as {result: any[]};
             
             // Extra null check here to fix the error
-            if (typedDataMessage.result !== undefined && 
+            if (typedDataMessage !== null &&
+                typeof typedDataMessage === 'object' &&
+                typedDataMessage.result !== undefined && 
                 Array.isArray(typedDataMessage.result) && 
                 typedDataMessage.result.length > 0) {
               // Nếu có kết quả, coi như thành công
