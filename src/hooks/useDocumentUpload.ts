@@ -60,8 +60,9 @@ export const useDocumentUpload = () => {
             dataMessage !== undefined &&
             typeof dataMessage === 'object') {
           
-          // Additional null check before accessing 'result' property - Fix for line 64,27 and 64,95
+          // Additional null check before accessing 'result' property - Fix for line 65,27 and 66,15
           if (dataMessage !== null && 
+              typeof dataMessage === 'object' &&
               'result' in dataMessage && 
               dataMessage.result !== null) {
               
@@ -128,18 +129,17 @@ export const useDocumentUpload = () => {
              data.message !== undefined &&
              typeof data.message === 'object')) {
           
-          // Additional checks for data.message being an object and having execution_status - Fix for line 132,37
-          if (data.message !== null && 
-              data.message !== undefined &&
-              typeof data.message === 'object' && 
-              data.message !== null &&  // Extra null check to satisfy TS
-              'execution_status' in data.message) {
+          // Additional checks for data.message being an object and having execution_status - Fix for line 136,37
+          const message = data.message;
+          if (message !== null && 
+              message !== undefined &&
+              typeof message === 'object') {
+              
+            // Create a typed variable to satisfy TypeScript and add extra null check
+            const messageData = message as {execution_status?: string | null | undefined};
             
-            // Create a typed variable to satisfy TypeScript
-            const messageData = data.message as {execution_status: string | null | undefined};
-            
-            // Add extra null check for messageData.execution_status
-            if (messageData !== null &&
+            // Check if execution_status exists and is COMPLETED
+            if ('execution_status' in messageData && 
                 messageData.execution_status !== null &&
                 messageData.execution_status !== undefined &&
                 messageData.execution_status === "COMPLETED") {
