@@ -61,13 +61,12 @@ export const useDocumentUpload = () => {
             typeof dataMessage === 'object') {
           
           // Additional null check before accessing 'result' property
-          if ('result' in dataMessage) {
+          if ('result' in dataMessage && dataMessage.result !== null) {
             // Explicitly cast dataMessage to avoid TypeScript errors with 'result'
             const typedDataMessage = dataMessage as {result: any[]};
             
             // Extra null check here to fix the error
-            if (typedDataMessage !== null && 
-                typedDataMessage.result !== null && 
+            if (typedDataMessage.result !== undefined && 
                 Array.isArray(typedDataMessage.result) && 
                 typedDataMessage.result.length > 0) {
               // Nếu có kết quả, coi như thành công
@@ -128,15 +127,17 @@ export const useDocumentUpload = () => {
           
           // Additional checks for data.message being an object and having execution_status
           if (data.message !== null && 
+              data.message !== undefined &&
               typeof data.message === 'object' && 
               'execution_status' in data.message) {
             
             // Create a typed variable to satisfy TypeScript
-            const messageData = data.message as {execution_status: string};
+            const messageData = data.message as {execution_status: string | null | undefined};
             
             // Add extra null check for messageData.execution_status
             if (messageData !== null &&
                 messageData.execution_status !== null &&
+                messageData.execution_status !== undefined &&
                 messageData.execution_status === "COMPLETED") {
               setResult(data);
               toast({
