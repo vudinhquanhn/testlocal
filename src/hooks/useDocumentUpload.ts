@@ -59,21 +59,14 @@ export const useDocumentUpload = () => {
             dataMessage !== undefined &&
             typeof dataMessage === 'object') {
           
-          // Fix for lines 67, 68, and 69: Add strict null check before accessing properties
-          // Only proceed if dataMessage exists, is an object, and has the 'result' property
-          if (dataMessage !== null && 
-              typeof dataMessage === 'object' && 
-              'result' in dataMessage && 
-              dataMessage.result !== null && 
-              dataMessage.result !== undefined) {
-              
-            // Explicitly cast dataMessage to avoid TypeScript errors with 'result'
+          // Kiểm tra chặt chẽ trước khi truy cập các thuộc tính
+          // Chỉ tiếp tục nếu dataMessage tồn tại, là một đối tượng, và có thuộc tính 'result'
+          if ('result' in dataMessage) {
+            // Tạo biến kiểu rõ ràng để tránh lỗi TypeScript
             const typedDataMessage = dataMessage as {result: any[]};
             
-            // Extra null check here to fix the error
-            if (typedDataMessage !== null &&
-                typeof typedDataMessage === 'object' &&
-                typedDataMessage.result !== undefined && 
+            // Kiểm tra chặt chẽ các điều kiện trước khi sử dụng
+            if (typedDataMessage.result !== undefined && 
                 Array.isArray(typedDataMessage.result) && 
                 typedDataMessage.result.length > 0) {
               // Nếu có kết quả, coi như thành công
