@@ -60,19 +60,23 @@ export const useDocumentUpload = () => {
             dataMessage !== undefined &&
             typeof dataMessage === 'object') {
           
-          // Only access result if it exists in dataMessage
-          if ('result' in dataMessage && 
-              dataMessage.result !== null && 
-              Array.isArray(dataMessage.result) && 
-              dataMessage.result.length > 0) {
-            // Nếu có kết quả, coi như thành công
-            setResult(data);
-            toast({
-              title: "Hoàn thành",
-              description: "Đã xử lý tài liệu thành công.",
-            });
-            setIsUploading(false);
-            return;
+          // Additional null check before accessing 'result' property
+          if ('result' in dataMessage) {
+            // Explicitly cast dataMessage to avoid TypeScript errors with 'result'
+            const typedDataMessage = dataMessage as {result: any[]};
+            
+            if (typedDataMessage.result !== null && 
+                Array.isArray(typedDataMessage.result) && 
+                typedDataMessage.result.length > 0) {
+              // Nếu có kết quả, coi như thành công
+              setResult(data);
+              toast({
+                title: "Hoàn thành",
+                description: "Đã xử lý tài liệu thành công.",
+              });
+              setIsUploading(false);
+              return;
+            }
           }
         }
         
@@ -118,18 +122,40 @@ export const useDocumentUpload = () => {
             data.status === "success" ||
             (data.message !== null && 
              data.message !== undefined &&
-             typeof data.message === 'object' &&
-             'execution_status' in data.message && 
-             data.message.execution_status !== null &&
-             data.message.execution_status === "COMPLETED")) {
-          setResult(data);
-          toast({
-            title: "Hoàn thành",
-            description: "Đã xử lý tài liệu thành công.",
-          });
-          setIsPolling(false);
-          setIsUploading(false);
-          return;
+             typeof data.message === 'object')) {
+          
+          // Additional checks for data.message being an object and having execution_status
+          if (data.message && 
+              typeof data.message === 'object' && 
+              'execution_status' in data.message) {
+            
+            // Create a typed variable to satisfy TypeScript
+            const messageData = data.message as {execution_status: string};
+            
+            if (messageData.execution_status !== null &&
+                messageData.execution_status === "COMPLETED") {
+              setResult(data);
+              toast({
+                title: "Hoàn thành",
+                description: "Đã xử lý tài liệu thành công.",
+              });
+              setIsPolling(false);
+              setIsUploading(false);
+              return;
+            }
+          }
+          
+          // If we reached here with a completed/success status but no execution_status
+          if (data.status === "completed" || data.status === "success") {
+            setResult(data);
+            toast({
+              title: "Hoàn thành",
+              description: "Đã xử lý tài liệu thành công.",
+            });
+            setIsPolling(false);
+            setIsUploading(false);
+            return;
+          }
         } else if (data.status === "failed" || data.status === "error") {
           toast({
             title: "Xử lý thất bại",
