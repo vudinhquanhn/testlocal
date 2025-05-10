@@ -134,7 +134,9 @@ export const useDocumentUpload = () => {
             // Create a typed variable to satisfy TypeScript
             const messageData = data.message as {execution_status: string};
             
-            if (messageData.execution_status !== null &&
+            // Add extra null check for messageData.execution_status
+            if (messageData !== null &&
+                messageData.execution_status !== null &&
                 messageData.execution_status === "COMPLETED") {
               setResult(data);
               toast({
