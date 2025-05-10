@@ -39,9 +39,8 @@ export const uploadDocument = async (file: File): Promise<UploadResponse> => {
     const response = await fetch(API_BASE_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${AUTH_TOKEN}`,
-        "Accept": "application/json"
-        // Loại bỏ các headers không cần thiết, để trình duyệt tự động thêm headers cần thiết cho form-data
+        "Authorization": `Bearer ${AUTH_TOKEN}`
+        // Đã bỏ header "Accept": "application/json" theo yêu cầu
       },
       body: formData,
       signal: controller.signal,
