@@ -65,7 +65,9 @@ export const useDocumentUpload = () => {
             // Explicitly cast dataMessage to avoid TypeScript errors with 'result'
             const typedDataMessage = dataMessage as {result: any[]};
             
-            if (typedDataMessage.result !== null && 
+            // Extra null check here to fix the error
+            if (typedDataMessage !== null && 
+                typedDataMessage.result !== null && 
                 Array.isArray(typedDataMessage.result) && 
                 typedDataMessage.result.length > 0) {
               // Nếu có kết quả, coi như thành công
@@ -125,7 +127,7 @@ export const useDocumentUpload = () => {
              typeof data.message === 'object')) {
           
           // Additional checks for data.message being an object and having execution_status
-          if (data.message && 
+          if (data.message !== null && 
               typeof data.message === 'object' && 
               'execution_status' in data.message) {
             
