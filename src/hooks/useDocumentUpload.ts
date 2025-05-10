@@ -54,10 +54,11 @@ export const useDocumentUpload = () => {
       } else if (data.error || data.message !== undefined) {
         // Kiểm tra nếu đây không phải là một lỗi thực sự mà là phản hồi thành công
         const dataMessage = data.message;
+        // Ensure dataMessage is not null and is an object before accessing its properties
         if (dataMessage !== null && 
             dataMessage !== undefined &&
             typeof dataMessage === 'object' && 
-            dataMessage.result && 
+            'result' in dataMessage && 
             Array.isArray(dataMessage.result) && 
             dataMessage.result.length > 0) {
           // Nếu có kết quả, coi như thành công
@@ -112,6 +113,7 @@ export const useDocumentUpload = () => {
             (data.message !== null && 
              data.message !== undefined &&
              typeof data.message === 'object' &&
+             'execution_status' in data.message && 
              data.message.execution_status === "COMPLETED")) {
           setResult(data);
           toast({
